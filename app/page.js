@@ -2,6 +2,71 @@
 
 import { useState, useEffect } from "react";
 
+const materiasIniciais = [
+  {
+    materia: "Economia Empresarial",
+    dia: "Segunda",
+    status: "Não iniciado",
+    material:
+      "Aula introdutória + resumo sobre oferta, demanda e mercado.",
+    progresso: 0,
+  },
+
+  {
+    materia: "Princípios de Gestão",
+    dia: "Terça",
+    status: "Não iniciado",
+    material:
+      "Estudar funções administrativas + mapa mental da matéria.",
+    progresso: 0,
+  },
+
+  {
+    materia: "Matemática Empresarial",
+    dia: "Quarta",
+    status: "Em andamento",
+    material:
+      "Resolver exercícios de porcentagem, juros simples e compostos.",
+    progresso: 25,
+  },
+
+  {
+    materia: "Comportamento Organizacional",
+    dia: "Quinta",
+    status: "Em andamento",
+    material:
+      "Leitura sobre motivação no trabalho + atividade prática.",
+    progresso: 45,
+  },
+
+  {
+    materia: "Labvida em Gestão de Recursos Humanos 1",
+    dia: "Sexta",
+    status: "Não iniciado",
+    material:
+      "Analisar estudos de caso sobre recrutamento e seleção.",
+    progresso: 0,
+  },
+
+  {
+    materia: "Responsabilidade Social e Sustentabilidade",
+    dia: "Segunda",
+    status: "Revisar",
+    material:
+      "Revisar conceitos ESG e responsabilidade corporativa.",
+    progresso: 70,
+  },
+
+  {
+    materia: "Analista Pleno DP e eSocial",
+    dia: "Terça",
+    status: "Em andamento",
+    material:
+      "Treinar admissões, férias, rescisão e fechamento do eSocial.",
+    progresso: 40,
+  },
+];
+
 export default function Home() {
   const [estudos, setEstudos] = useState([]);
   const [novaMateria, setNovaMateria] = useState("");
@@ -12,15 +77,7 @@ export default function Home() {
     if (dados) {
       setEstudos(JSON.parse(dados));
     } else {
-      setEstudos([
-        {
-          materia: "Comportamento Organizacional",
-          dia: "Segunda",
-          status: "Em andamento",
-          material: "",
-          progresso: 45,
-        },
-      ]);
+      setEstudos(materiasIniciais);
     }
   }, []);
 
