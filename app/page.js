@@ -1,36 +1,31 @@
+"use client";
+
+import { useState } from "react";
+
 export default function Home() {
-  const estudos = [
+  const [estudos, setEstudos] = useState([
     {
       materia: "Comportamento Organizacional",
       dia: "Segunda",
       status: "Em andamento",
-      cor: "#facc15",
-    },
-    {
-      materia: "Rotinas de Departamento Pessoal",
-      dia: "Segunda",
-      status: "Concluído",
-      cor: "#22c55e",
     },
     {
       materia: "Matemática Empresarial",
       dia: "Terça",
       status: "Não iniciado",
-      cor: "#ef4444",
-    },
-    {
-      materia: "eSocial / SST / Eventos",
-      dia: "Terça",
-      status: "Em andamento",
-      cor: "#f97316",
     },
     {
       materia: "Folha de Pagamento",
       dia: "Quarta",
-      status: "Revisar",
-      cor: "#3b82f6",
+      status: "Concluído",
     },
-  ];
+  ]);
+
+  const alterarStatus = (index, novoStatus) => {
+    const novosEstudos = [...estudos];
+    novosEstudos[index].status = novoStatus;
+    setEstudos(novosEstudos);
+  };
 
   return (
     <div
@@ -61,12 +56,7 @@ export default function Home() {
         Faculdade + DP/eSocial
       </p>
 
-      <div
-        style={{
-          display: "grid",
-          gap: "20px",
-        }}
-      >
+      <div style={{ display: "grid", gap: "20px" }}>
         {estudos.map((item, index) => (
           <div
             key={index}
@@ -77,32 +67,52 @@ export default function Home() {
               boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
             }}
           >
-            <h2
-              style={{
-                marginBottom: "10px",
-                fontSize: "20px",
+            <input
+              value={item.materia}
+              onChange={(e) => {
+                const novos = [...estudos];
+                novos[index].materia = e.target.value;
+                setEstudos(novos);
               }}
-            >
-              {item.materia}
-            </h2>
-
-            <p>
-              <strong>Dia:</strong> {item.dia}
-            </p>
-
-            <div
               style={{
-                marginTop: "15px",
-                display: "inline-block",
-                background: item.cor,
-                color: "white",
-                padding: "8px 14px",
-                borderRadius: "999px",
+                width: "100%",
+                padding: "10px",
+                fontSize: "18px",
+                marginBottom: "10px",
+              }}
+            />
+
+            <input
+              value={item.dia}
+              onChange={(e) => {
+                const novos = [...estudos];
+                novos[index].dia = e.target.value;
+                setEstudos(novos);
+              }}
+              style={{
+                width: "100%",
+                padding: "10px",
+                marginBottom: "10px",
+              }}
+            />
+
+            <select
+              value={item.status}
+              onChange={(e) =>
+                alterarStatus(index, e.target.value)
+              }
+              style={{
+                width: "100%",
+                padding: "12px",
+                borderRadius: "10px",
                 fontWeight: "bold",
               }}
             >
-              {item.status}
-            </div>
+              <option>Não iniciado</option>
+              <option>Em andamento</option>
+              <option>Concluído</option>
+              <option>Revisar</option>
+            </select>
           </div>
         ))}
       </div>
