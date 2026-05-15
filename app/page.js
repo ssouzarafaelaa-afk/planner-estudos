@@ -1,31 +1,69 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
-  const [estudos, setEstudos] = useState([
-    {
-      materia: "Comportamento Organizacional",
-      dia: "Segunda",
-      status: "Em andamento",
-    },
-    {
-      materia: "Matemática Empresarial",
-      dia: "Terça",
-      status: "Não iniciado",
-    },
-    {
-      materia: "Folha de Pagamento",
-      dia: "Quarta",
-      status: "Concluído",
-    },
-  ]);
+  const [estudos, setEstudos] = useState([]);
 
-  const alterarStatus = (index, novoStatus) => {
-    const novosEstudos = [...estudos];
-    novosEstudos[index].status = novoStatus;
-    setEstudos(novosEstudos);
+  const [novaMateria, setNovaMateria] = useState("");
+
+  useEffect(() => {
+    const dadosSalvos = localStorage.getItem("planner");
+    if (dadosSalvos) {
+      setEstudos(JSON.parse(dadosSalvos));
+    } else {
+      setEstudos([
+        {
+          materia: "Comportamento Organizacional",
+          dia: "Segunda",
+          status: "Em andamento",
+          resumo: "",
+          material: "",
+        },
+      ]);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("planner", JSON.stringify(estudos));
+  }, [estudos]);
+
+  const alterarCampo = (index, campo, valor) => {
+    const novos = [...estudos];
+    novos[index][campo] = valor;
+    setEstudos(novos);
   };
+
+  const adicionarMateria = () => {
+    if (!novaMateria) return;
+
+    setEstudos([
+      ...estudos,
+      {
+        materia: novaMateria,
+        dia: "",
+        status: "Não iniciado",
+        resumo: "",
+        material: "",
+      },
+    ]);
+
+    setNovaMateria("");
+  };
+
+  const removerMateria = (index) => {
+    const novos = estudos.filter((_, i) => i !== index);
+    setEstudos(novos);
+  };
+
+  const total = estudos.length;
+
+  const concluidos = estudos.filter(
+    (e) => e.status === "Concluído"
+  ).length;
+
+  const progresso =
+    total > 0 ? Math.round((concluidos / total) * 100) : 0;
 
   return (
     <div
@@ -39,8 +77,7 @@ export default function Home() {
       <h1
         style={{
           textAlign: "center",
-          fontSize: "32px",
-          marginBottom: "10px",
+          fontSize: "34px",
         }}
       >
         Planner de Estudos
@@ -49,14 +86,89 @@ export default function Home() {
       <p
         style={{
           textAlign: "center",
-          marginBottom: "30px",
-          color: "#555",
+          color: "#666",
+          marginBottom: "20px",
         }}
       >
         Faculdade + DP/eSocial
       </p>
 
-      <div style={{ display: "grid", gap: "20px" }}>
+      <div
+        style={{
+          background: "white",
+          padding: "20px",
+          borderRadius: "16px",
+          marginBottom: "20px",
+        }}
+      >
+        <h2>Progresso Geral</h2>
+
+        <div
+          style={{
+            background: "#ddd",
+            height: "20px",
+            borderRadius: "999px",
+            overflow: "hidden",
+            marginTop: "10px",
+          }}
+        >
+          <div
+            style={{
+              width: `${progresso}%`,
+              background: "#22c55e",
+              height: "100%",
+            }}
+          />
+        </div>
+
+        <p style={{ marginTop: "10px" }}>
+          {progresso}% concluído
+        </p>
+      </div>
+
+      <div
+        style={{
+          background: "white",
+          padding: "20px",
+          borderRadius: "16px",
+          marginBottom: "20px",
+        }}
+      >
+        <h2>Adicionar Matéria</h2>
+
+        <input
+          placeholder="Nome da matéria"
+          value={novaMateria}
+          onChange={(e) => setNovaMateria(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "12px",
+            marginTop: "10px",
+            marginBottom: "10px",
+          }}
+        />
+
+        <button
+          onClick={adicionarMateria}
+          style={{
+            background: "#2563eb",
+            color: "white",
+            border: "none",
+            padding: "12px 20px",
+            borderRadius: "10px",
+            cursor: "pointer",
+          }}
+        >
+          Adicionar
+        </button>
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gap: "20px",
+        }}
+      >
         {estudos.map((item, index) => (
           <div
             key={index}
@@ -69,29 +181,26 @@ export default function Home() {
           >
             <input
               value={item.materia}
-              onChange={(e) => {
-                const novos = [...estudos];
-                novos[index].materia = e.target.value;
-                setEstudos(novos);
-              }}
+              onChange={(e) =>
+                alterarCampo(index, "materia", e.target.value)
+              }
               style={{
                 width: "100%",
-                padding: "10px",
-                fontSize: "18px",
+                padding: "12px",
+                fontSize: "20px",
                 marginBottom: "10px",
               }}
             />
 
             <input
+              placeholder="Dia"
               value={item.dia}
-              onChange={(e) => {
-                const novos = [...estudos];
-                novos[index].dia = e.target.value;
-                setEstudos(novos);
-              }}
+              onChange={(e) =>
+                alterarCampo(index, "dia", e.target.value)
+              }
               style={{
                 width: "100%",
-                padding: "10px",
+                padding: "12px",
                 marginBottom: "10px",
               }}
             />
@@ -99,13 +208,13 @@ export default function Home() {
             <select
               value={item.status}
               onChange={(e) =>
-                alterarStatus(index, e.target.value)
+                alterarCampo(index, "status", e.target.value)
               }
               style={{
                 width: "100%",
                 padding: "12px",
+                marginBottom: "10px",
                 borderRadius: "10px",
-                fontWeight: "bold",
               }}
             >
               <option>Não iniciado</option>
@@ -113,6 +222,48 @@ export default function Home() {
               <option>Concluído</option>
               <option>Revisar</option>
             </select>
+
+            <textarea
+              placeholder="Resumo da matéria"
+              value={item.resumo}
+              onChange={(e) =>
+                alterarCampo(index, "resumo", e.target.value)
+              }
+              style={{
+                width: "100%",
+                padding: "12px",
+                minHeight: "100px",
+                marginBottom: "10px",
+              }}
+            />
+
+            <textarea
+              placeholder="Links, PDFs, materiais..."
+              value={item.material}
+              onChange={(e) =>
+                alterarCampo(index, "material", e.target.value)
+              }
+              style={{
+                width: "100%",
+                padding: "12px",
+                minHeight: "80px",
+                marginBottom: "10px",
+              }}
+            />
+
+            <button
+              onClick={() => removerMateria(index)}
+              style={{
+                background: "#ef4444",
+                color: "white",
+                border: "none",
+                padding: "10px 16px",
+                borderRadius: "10px",
+                cursor: "pointer",
+              }}
+            >
+              Excluir Matéria
+            </button>
           </div>
         ))}
       </div>
