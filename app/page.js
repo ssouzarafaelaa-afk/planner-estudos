@@ -4,21 +4,21 @@ import { useState, useEffect } from "react";
 
 export default function Home() {
   const [estudos, setEstudos] = useState([]);
-
   const [novaMateria, setNovaMateria] = useState("");
 
   useEffect(() => {
-    const dadosSalvos = localStorage.getItem("planner");
-    if (dadosSalvos) {
-      setEstudos(JSON.parse(dadosSalvos));
+    const dados = localStorage.getItem("planner");
+
+    if (dados) {
+      setEstudos(JSON.parse(dados));
     } else {
       setEstudos([
         {
           materia: "Comportamento Organizacional",
           dia: "Segunda",
           status: "Em andamento",
-          resumo: "",
           material: "",
+          progresso: 45,
         },
       ]);
     }
@@ -41,10 +41,10 @@ export default function Home() {
       ...estudos,
       {
         materia: novaMateria,
-        dia: "",
+        dia: "Segunda",
         status: "Não iniciado",
-        resumo: "",
         material: "",
+        progresso: 0,
       },
     ]);
 
@@ -62,8 +62,17 @@ export default function Home() {
     (e) => e.status === "Concluído"
   ).length;
 
-  const progresso =
-    total > 0 ? Math.round((concluidos / total) * 100) : 0;
+  const andamento = estudos.filter(
+    (e) => e.status === "Em andamento"
+  ).length;
+
+  const revisar = estudos.filter(
+    (e) => e.status === "Revisar"
+  ).length;
+
+  const naoIniciado = estudos.filter(
+    (e) => e.status === "Não iniciado"
+  ).length;
 
   return (
     <div
@@ -77,7 +86,8 @@ export default function Home() {
       <h1
         style={{
           textAlign: "center",
-          fontSize: "34px",
+          fontSize: "36px",
+          marginBottom: "10px",
         }}
       >
         Planner de Estudos
@@ -87,51 +97,61 @@ export default function Home() {
         style={{
           textAlign: "center",
           color: "#666",
-          marginBottom: "20px",
+          marginBottom: "30px",
         }}
       >
         Faculdade + DP/eSocial
       </p>
 
+      {/* DASHBOARD */}
+
       <div
         style={{
-          background: "white",
-          padding: "20px",
-          borderRadius: "16px",
-          marginBottom: "20px",
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))",
+          gap: "15px",
+          marginBottom: "30px",
         }}
       >
-        <h2>Progresso Geral</h2>
+        <DashboardCard
+          titulo="Concluído"
+          valor={concluidos}
+          cor="#22c55e"
+        />
 
-        <div
-          style={{
-            background: "#ddd",
-            height: "20px",
-            borderRadius: "999px",
-            overflow: "hidden",
-            marginTop: "10px",
-          }}
-        >
-          <div
-            style={{
-              width: `${progresso}%`,
-              background: "#22c55e",
-              height: "100%",
-            }}
-          />
-        </div>
+        <DashboardCard
+          titulo="Em andamento"
+          valor={andamento}
+          cor="#f59e0b"
+        />
 
-        <p style={{ marginTop: "10px" }}>
-          {progresso}% concluído
-        </p>
+        <DashboardCard
+          titulo="Revisar"
+          valor={revisar}
+          cor="#3b82f6"
+        />
+
+        <DashboardCard
+          titulo="Não iniciado"
+          valor={naoIniciado}
+          cor="#ef4444"
+        />
+
+        <DashboardCard
+          titulo="Total"
+          valor={total}
+          cor="#6366f1"
+        />
       </div>
+
+      {/* ADICIONAR MATÉRIA */}
 
       <div
         style={{
           background: "white",
           padding: "20px",
           borderRadius: "16px",
-          marginBottom: "20px",
+          marginBottom: "30px",
         }}
       >
         <h2>Adicionar Matéria</h2>
@@ -145,6 +165,8 @@ export default function Home() {
             padding: "12px",
             marginTop: "10px",
             marginBottom: "10px",
+            borderRadius: "10px",
+            border: "1px solid #ccc",
           }}
         />
 
@@ -162,6 +184,8 @@ export default function Home() {
           Adicionar
         </button>
       </div>
+
+      {/* CARDS */}
 
       <div
         style={{
@@ -188,12 +212,15 @@ export default function Home() {
                 width: "100%",
                 padding: "12px",
                 fontSize: "20px",
-                marginBottom: "10px",
+                marginBottom: "12px",
+                borderRadius: "10px",
+                border: "1px solid #ccc",
               }}
             />
 
-            <input
-              placeholder="Dia"
+            {/* DIA DA SEMANA */}
+
+            <select
               value={item.dia}
               onChange={(e) =>
                 alterarCampo(index, "dia", e.target.value)
@@ -201,9 +228,18 @@ export default function Home() {
               style={{
                 width: "100%",
                 padding: "12px",
-                marginBottom: "10px",
+                marginBottom: "12px",
+                borderRadius: "10px",
               }}
-            />
+            >
+              <option>Segunda</option>
+              <option>Terça</option>
+              <option>Quarta</option>
+              <option>Quinta</option>
+              <option>Sexta</option>
+            </select>
+
+            {/* STATUS */}
 
             <select
               value={item.status}
@@ -213,7 +249,7 @@ export default function Home() {
               style={{
                 width: "100%",
                 padding: "12px",
-                marginBottom: "10px",
+                marginBottom: "12px",
                 borderRadius: "10px",
               }}
             >
@@ -223,19 +259,54 @@ export default function Home() {
               <option>Revisar</option>
             </select>
 
-            <textarea
-              placeholder="Resumo da matéria"
-              value={item.resumo}
+            {/* PROGRESSO */}
+
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={item.progresso}
               onChange={(e) =>
-                alterarCampo(index, "resumo", e.target.value)
+                alterarCampo(
+                  index,
+                  "progresso",
+                  e.target.value
+                )
               }
               style={{
                 width: "100%",
-                padding: "12px",
-                minHeight: "100px",
                 marginBottom: "10px",
               }}
             />
+
+            <div
+              style={{
+                background: "#ddd",
+                height: "18px",
+                borderRadius: "999px",
+                overflow: "hidden",
+                marginBottom: "10px",
+              }}
+            >
+              <div
+                style={{
+                  width: `${item.progresso}%`,
+                  background: "#22c55e",
+                  height: "100%",
+                }}
+              />
+            </div>
+
+            <p
+              style={{
+                marginBottom: "15px",
+                fontWeight: "bold",
+              }}
+            >
+              Progresso: {item.progresso}%
+            </p>
+
+            {/* MATERIAL */}
 
             <textarea
               placeholder="Links, PDFs, materiais..."
@@ -246,8 +317,10 @@ export default function Home() {
               style={{
                 width: "100%",
                 padding: "12px",
-                minHeight: "80px",
-                marginBottom: "10px",
+                minHeight: "90px",
+                marginBottom: "12px",
+                borderRadius: "10px",
+                border: "1px solid #ccc",
               }}
             />
 
@@ -262,11 +335,36 @@ export default function Home() {
                 cursor: "pointer",
               }}
             >
-              Excluir Matéria
+              Excluir
             </button>
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+function DashboardCard({ titulo, valor, cor }) {
+  return (
+    <div
+      style={{
+        background: cor,
+        color: "white",
+        padding: "20px",
+        borderRadius: "16px",
+        textAlign: "center",
+      }}
+    >
+      <h3>{titulo}</h3>
+
+      <h1
+        style={{
+          fontSize: "38px",
+          marginTop: "10px",
+        }}
+      >
+        {valor}
+      </h1>
     </div>
   );
 }
